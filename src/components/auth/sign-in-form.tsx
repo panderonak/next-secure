@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form-feedback/form-error";
 import { FormSuccess } from "@/components/form-feedback/form-success";
 import { useState, useTransition } from "react";
-import { signIn } from "@/actions/auth/sign-in";
+import { signInUser } from "@/actions/auth/sign-in";
 
 export function SignInForm() {
   const form = useForm<z.infer<typeof signInSchema>>({
@@ -39,7 +39,7 @@ export function SignInForm() {
     setSuccess("");
 
     startTransition(() => {
-      signIn(values).then((data) => {
+      signInUser(values).then((data) => {
         if (data.error) {
           setError(data.error);
         } else if (data.success) {
