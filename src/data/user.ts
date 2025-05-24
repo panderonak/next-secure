@@ -26,3 +26,21 @@ export async function getUserById(id: string) {
     return null;
   }
 }
+
+export async function getUserVerifiedByUsername(username: string) {
+  try {
+    const user = await db.user.findUnique({
+      where: {
+        username,
+      },
+      select: {
+        username: true,
+        emailVerified: true,
+      },
+    });
+
+    return user;
+  } catch (error) {
+    return null;
+  }
+}
