@@ -19,7 +19,9 @@ import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form-feedback/form-error";
 import { FormSuccess } from "@/components/form-feedback/form-success";
 import { useState, useTransition } from "react";
-import { signUp } from "@/actions/auth/sign-up";
+import axios, { AxiosError } from "axios";
+import APIResponseInterface from "@/types/APIResponseInterface";
+import { useRouter } from "next/navigation";
 
 export function SignUpForm() {
   const form = useForm<z.infer<typeof signUpSchema>>({
@@ -34,19 +36,37 @@ export function SignUpForm() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
+  const router = useRouter();
 
   function onSubmit(values: z.infer<typeof signUpSchema>) {
     setError("");
     setSuccess("");
 
-    startTransition(() => {
-      signUp(values).then((data) => {
-        if (data.error) {
-          setError(data.error);
-        } else if (data.success) {
-          setSuccess(data.success);
-        }
-      });
+    startTransition(async () => {
+      try {
+        console.log("I am inside try.");
+        const response = await axios.post<APIResponseInterface>(
+          "/api/sign-up",
+          values
+        );
+
+        console.log(response.data);
+
+        if (response.data.success) setSuccess(response.data.message);
+
+        router.replace(`/verify/${values.username}`);
+      } catch (error: any) {
+        const axiosError = error as AxiosError<APIResponseInterface>;
+        let errorMessage =
+          axiosError.response?.data.message ||
+          "Something went wrong. Please try again.";
+
+        setError(errorMessage);
+
+        console.error(
+          `Error occurred while sign up user. Error details: ${error}. Stack trace: ${error.stack || "No stack trace available"}`
+        );
+      }
     });
   }
 
@@ -73,9 +93,6 @@ export function SignUpForm() {
                     disabled={isPending}
                   />
                 </FormControl>
-                <FormDescription>
-                  This is your public display name.
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -94,9 +111,6 @@ export function SignUpForm() {
                     disabled={isPending}
                   />
                 </FormControl>
-                <FormDescription>
-                  This is your public display name.
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -116,8 +130,6 @@ export function SignUpForm() {
                     disabled={isPending}
                   />
                 </FormControl>
-                <FormDescription>This is your password.</FormDescription>
-                <FormMessage />
               </FormItem>
             )}
           />
