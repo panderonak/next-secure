@@ -22,14 +22,14 @@ enum UserRole {
 
 model User {
   id            String    @id @default(cuid())
-  username      String?
+  username      String?   @unique
   password      String?
   role          UserRole @default(USER)
   email         String?   @unique
   emailVerified DateTime? @map("email_verified")
   image         String?
   accounts      Account[]
-   @@map("users")
+  @@map("users")
 }
 
 model Account {
@@ -50,4 +50,24 @@ model Account {
  
   @@unique([provider, providerAccountId])
   @@map("accounts")
+}
+
+model VerificationCode {
+  id      String   @id @default(cuid())
+  email   String
+  code   String   @unique
+  expires DateTime
+
+  @@unique([email, code])
+  @@index([email])
+}
+
+model ResetPasswordCode {
+  id      String   @id @default(cuid())
+  email   String
+  code   String   @unique
+  expires DateTime
+
+  @@unique([email, code])
+  @@index([email])
 }
