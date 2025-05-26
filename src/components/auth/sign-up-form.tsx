@@ -12,7 +12,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,7 @@ import { useState, useTransition } from "react";
 import axios, { AxiosError } from "axios";
 import APIResponseInterface from "@/types/APIResponseInterface";
 import { useRouter } from "next/navigation";
+import { BeatLoader } from "react-spinners";
 
 export function SignUpForm() {
   const form = useForm<z.infer<typeof signUpSchema>>({
@@ -54,7 +54,7 @@ export function SignUpForm() {
 
         if (response.data.success) setSuccess(response.data.message);
 
-        router.replace(`/verify/${values.username}`);
+        router.replace(`/verification/${values.username}`);
       } catch (error: any) {
         const axiosError = error as AxiosError<APIResponseInterface>;
         let errorMessage =
@@ -115,7 +115,6 @@ export function SignUpForm() {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="password"
@@ -137,7 +136,7 @@ export function SignUpForm() {
           <FormSuccess message={success} />
 
           <Button type="submit" disabled={isPending} className="w-full">
-            Sign Up
+            {isPending ? <BeatLoader color="#fff" size={5} /> : "Sign Up"}
           </Button>
         </form>
       </Form>
