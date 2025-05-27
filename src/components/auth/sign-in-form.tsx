@@ -19,7 +19,11 @@ import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form-feedback/form-error";
 import { FormSuccess } from "@/components/form-feedback/form-success";
 import { useState, useTransition } from "react";
-import { signInUser } from "@/actions/auth/sign-in";
+import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
+// import { signIn } from '@/auth';
+import { BeatLoader } from "react-spinners";
 
 export function SignInForm() {
   const form = useForm<z.infer<typeof signInSchema>>({
@@ -30,24 +34,41 @@ export function SignInForm() {
     },
   });
 
+  const { reset } = form;
+
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
 
-  function onSubmit(values: z.infer<typeof signInSchema>) {
+  const router = useRouter();
+
+  const searchParams = useSearchParams();
+  const urlError =
+    searchParams.get("error") === "OAuthAccountNotLinked"
+      ? "This email is linked to a different sign-in method."
+      : "";
+
+  const onSubmit = (values: z.infer<typeof signInSchema>) => {
     setError("");
     setSuccess("");
-
-    startTransition(() => {
-      signInUser(values).then((data) => {
-        if (data.error) {
-          setError(data.error);
-        } else if (data.success) {
-          setSuccess(data.success);
-        }
+    startTransition(async () => {
+      const response = await signIn("credentials", {
+        redirect: false,
+        ...values,
       });
+
+      if (response?.error) {
+        setError(
+          response?.error?.replace(/^Error:\s*/, "") || "Incorrect credentials."
+        );
+      }
+
+      if (response?.url) {
+        router.replace("/settings");
+        setSuccess(response.message);
+      }
     });
-  }
+  };
 
   return (
     <CardWrapper
@@ -99,11 +120,11 @@ export function SignInForm() {
               </FormItem>
             )}
           />
-          <FormError message={error} />
+          <FormError message={error || urlError} />
           <FormSuccess message={success} />
 
           <Button type="submit" disabled={isPending} className="w-full">
-            Sign In
+            {isPending ? <BeatLoader color="#fff" size={5} /> : "Sign In"}
           </Button>
         </form>
       </Form>
