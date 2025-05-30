@@ -1,8 +1,8 @@
-import { db } from "@/lib/db";
-import { UsernameParamSchema } from "@/schemas/sign-up-schema";
-import { verificationSchema } from "@/schemas/verification-schema";
-import APIResponseInterface from "@/types/APIResponseInterface";
-import { NextRequest, NextResponse } from "next/server";
+import { db } from '@/lib/db';
+import { UsernameSchema } from '@/schemas/sign-up-schema';
+import { verificationSchema } from '@/schemas/verification-schema';
+import APIResponseInterface from '@/types/APIResponseInterface';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(
   request: NextRequest,
@@ -11,7 +11,7 @@ export async function POST(
   try {
     const decodedUsername = decodeURIComponent(params.username);
 
-    const usernameValidation = UsernameParamSchema.safeParse({
+    const usernameValidation = UsernameSchema.safeParse({
       username: decodedUsername,
     });
 
@@ -21,11 +21,11 @@ export async function POST(
 
       if (usernameErrors && usernameErrors.length > 0) {
         console.error(
-          `Validation failed for username: ${usernameErrors.join(", ")}`
+          `Validation failed for username: ${usernameErrors.join(', ')}`
         );
       } else {
         console.error(
-          "Validation failed for username, but no specific errors were provided."
+          'Validation failed for username, but no specific errors were provided.'
         );
       }
 
@@ -45,16 +45,16 @@ export async function POST(
       const codeErrors = codeValidation.error.format().code?._errors;
 
       if (codeErrors && codeErrors.length > 0) {
-        console.error(`Validation failed for code: ${codeErrors.join(", ")}`);
+        console.error(`Validation failed for code: ${codeErrors.join(', ')}`);
       } else {
         console.error(
-          "Validation failed for code, but no specific errors were provided."
+          'Validation failed for code, but no specific errors were provided.'
         );
       }
       const responseBody: APIResponseInterface = {
         success: false,
         message:
-          "Hmm, that code doesn’t look right. Please check and try again.",
+          'Hmm, that code doesn’t look right. Please check and try again.',
       };
 
       return NextResponse.json(responseBody, { status: 400 });
@@ -83,7 +83,7 @@ export async function POST(
       const responseBody: APIResponseInterface = {
         success: false,
         message:
-          "Your enterd verification code is not valid. Please check and ensure that you typed correct code.",
+          'Your enterd verification code is not valid. Please check and ensure that you typed correct code.',
       };
 
       return NextResponse.json(responseBody, { status: 400 });
@@ -104,7 +104,7 @@ export async function POST(
 
     await db.user.update({
       where: { username },
-      data: { emailVerified: new Date() },
+      data: { emailVerified: new Date(), email: existingCode.email },
     });
 
     const responseBody: APIResponseInterface = {
@@ -113,10 +113,12 @@ export async function POST(
     };
 
     return NextResponse.json(responseBody, { status: 200 });
-  } catch (error: any) {
-    console.error(
-      `Error occurred while verifying the user. Details: ${error.message || error}. Stack trace: ${error.stack || "No stack trace available"}`
-    );
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error(
+        `Error occurred while verifying the user. Details: ${error.message || error}. Stack trace: ${error.stack || 'No stack trace available'}`
+      );
+    }
 
     const responseBody: APIResponseInterface = {
       success: false,
