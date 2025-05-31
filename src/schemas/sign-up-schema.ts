@@ -17,7 +17,7 @@ export const usernameValidation = z
       'Username must start with a letter and use only letters, numbers, underscores, or hyphens.',
   });
 
-export const UsernameSchema = z.object({
+export const usernameSchema = z.object({
   username: usernameValidation,
 });
 
@@ -30,7 +30,7 @@ export const passwordValidation = z
       'Password must include an uppercase letter, a lowercase letter, a number, and a special character (@$!%*?&).',
   });
 
-export const PasswordSchema = z.object({
+export const passwordSchema = z.object({
   password: passwordValidation,
 });
 
@@ -38,8 +38,8 @@ export const emailValidation = z.string().regex(EMAIL_REGEX, {
   message: 'Please enter a valid email address.',
 });
 
-export const EmailSchema = z.object({
-  username: passwordValidation,
+export const emailSchema = z.object({
+  email: emailValidation,
 });
 
 export const signUpSchema = z.object({
