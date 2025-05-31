@@ -1,16 +1,13 @@
-"use client";
-
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Header } from "@/components/auth/header";
-import { Socials } from "@/components/auth/socials";
-import { BackButton } from "@/components/auth/back-button";
+} from '@/components/ui/card';
+import { Header } from '@/components/auth/header';
+import { Socials } from '@/components/auth/socials';
+import { BackButton } from '@/components/auth/back-button';
 
 interface CardWrapperProps {
   children: React.ReactNode;
@@ -36,9 +33,6 @@ export function CardWrapper({
           <CardTitle>
             <Header label={headerLabel} />
           </CardTitle>
-          <CardDescription>
-            Deploy your new project in one-click.
-          </CardDescription>
         </CardHeader>
 
         <CardContent>{children}</CardContent>
