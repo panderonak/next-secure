@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { CardWrapper } from "@/components/auth/card-wrapper";
-import { signUpSchema } from "@/schemas/sign-up-schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { CardWrapper } from '@/components/auth/card-wrapper';
+import { signUpSchema } from '@/schemas/sign-up-schema';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 import {
   Form,
   FormControl,
@@ -12,41 +12,41 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { FormError } from "@/components/form-feedback/form-error";
-import { FormSuccess } from "@/components/form-feedback/form-success";
-import { useState, useTransition } from "react";
-import axios, { AxiosError } from "axios";
-import APIResponseInterface from "@/types/APIResponseInterface";
-import { useRouter } from "next/navigation";
-import { BeatLoader } from "react-spinners";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { FormError } from '@/components/form-feedback/form-error';
+import { FormSuccess } from '@/components/form-feedback/form-success';
+import { useState, useTransition } from 'react';
+import axios, { AxiosError } from 'axios';
+import APIResponseInterface from '@/types/APIResponseInterface';
+import { useRouter } from 'next/navigation';
+import { BeatLoader } from 'react-spinners';
 
 export function SignUpForm() {
   const form = useForm<z.infer<typeof signUpSchema>>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
-      username: "",
-      email: "",
-      password: "",
+      username: '',
+      email: '',
+      password: '',
     },
   });
 
   const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string | undefined>("");
-  const [success, setSuccess] = useState<string | undefined>("");
+  const [error, setError] = useState<string | undefined>('');
+  const [success, setSuccess] = useState<string | undefined>('');
   const router = useRouter();
 
   function onSubmit(values: z.infer<typeof signUpSchema>) {
-    setError("");
-    setSuccess("");
+    setError('');
+    setSuccess('');
 
     startTransition(async () => {
       try {
-        console.log("I am inside try.");
+        console.log('I am inside try.');
         const response = await axios.post<APIResponseInterface>(
-          "/api/sign-up",
+          '/api/sign-up',
           values
         );
 
@@ -55,17 +55,23 @@ export function SignUpForm() {
         if (response.data.success) setSuccess(response.data.message);
 
         router.replace(`/verification/${values.username}`);
-      } catch (error: any) {
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error(
+            `Password update failed. \nError Message: ${error.message}\nStack Trace: ${error.stack || 'No stack trace available'}`
+          );
+        } else {
+          console.error(
+            `Password update failed. \nUnknown error: ${JSON.stringify(error)}`
+          );
+        }
+
         const axiosError = error as AxiosError<APIResponseInterface>;
-        let errorMessage =
+        const errorMessage =
           axiosError.response?.data.message ||
-          "Something went wrong. Please try again.";
+          'Something went wrong. Please try again.';
 
         setError(errorMessage);
-
-        console.error(
-          `Error occurred while sign up user. Error details: ${error}. Stack trace: ${error.stack || "No stack trace available"}`
-        );
       }
     });
   }
@@ -136,7 +142,7 @@ export function SignUpForm() {
           <FormSuccess message={success} />
 
           <Button type="submit" disabled={isPending} className="w-full">
-            {isPending ? <BeatLoader color="#fff" size={5} /> : "Sign Up"}
+            {isPending ? <BeatLoader color="#fff" size={5} /> : 'Sign Up'}
           </Button>
         </form>
       </Form>
