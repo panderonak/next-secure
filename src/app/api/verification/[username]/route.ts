@@ -1,7 +1,8 @@
 import { db } from '@/lib/db';
-import { UsernameSchema } from '@/schemas/sign-up-schema';
+import { usernameSchema } from '@/schemas/sign-up-schema';
 import { verificationSchema } from '@/schemas/verification-schema';
 import APIResponseInterface from '@/types/APIResponseInterface';
+import bcrypt from 'bcryptjs';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(
@@ -11,7 +12,7 @@ export async function POST(
   try {
     const decodedUsername = decodeURIComponent(params.username);
 
-    const usernameValidation = UsernameSchema.safeParse({
+    const usernameValidation = usernameSchema.safeParse({
       username: decodedUsername,
     });
 
@@ -76,7 +77,7 @@ export async function POST(
     }
 
     const existingCode = await db.verificationCode.findFirst({
-      where: { email: existingUser?.email, code: codeValidation.data.code },
+      where: { email: existingUser?.email },
     });
 
     if (!existingCode) {
@@ -95,6 +96,20 @@ export async function POST(
       const responseBody: APIResponseInterface = {
         success: false,
         message: `Your verification code has expired. Please sign up again to receive a new code.`,
+      };
+
+      return NextResponse.json(responseBody, { status: 400 });
+    }
+
+    const isVerificationCodeValid = await bcrypt.compare(
+      code,
+      existingCode.code
+    );
+
+    if (!isVerificationCodeValid) {
+      const responseBody: APIResponseInterface = {
+        success: true,
+        message: `Invalid Code.`,
       };
 
       return NextResponse.json(responseBody, { status: 400 });
