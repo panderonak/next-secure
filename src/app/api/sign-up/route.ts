@@ -1,12 +1,12 @@
-import { getUserByEmail, getUserVerifiedByUsername } from "@/data/user";
-import { signUpSchema } from "@/schemas/sign-up-schema";
-import APIResponseInterface from "@/types/APIResponseInterface";
-import { NextRequest, NextResponse } from "next/server";
-import * as z from "zod";
-import bcryptjs from "bcryptjs";
-import { db } from "@/lib/db";
-import { generateAndSaveVerificationCode } from "@/lib/verification-code";
-import { verificationEmailSender } from "@/lib/emails/verification-email-sender";
+import { getUserByEmail, getUserVerifiedByUsername } from '@/data/user';
+import { signUpSchema } from '@/schemas/sign-up-schema';
+import APIResponseInterface from '@/types/APIResponseInterface';
+import { NextRequest, NextResponse } from 'next/server';
+import * as z from 'zod';
+import bcryptjs from 'bcryptjs';
+import { db } from '@/lib/db';
+import { generateAndSaveVerificationCode } from '@/lib/verification-code';
+import { verificationEmailSender } from '@/lib/emails/verification-email-sender';
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       const responseBody: APIResponseInterface = {
         success: false,
         message:
-          "It looks like some of the fields are incorrect. Please review your input and try again.",
+          'It looks like some of the fields are incorrect. Please review your input and try again.',
       };
 
       return NextResponse.json(responseBody, { status: 400 });
@@ -90,7 +90,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     };
 
     return NextResponse.json(responseBody, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error(
+        `An error occurred while registering the user: ${error}. Stack trace: ${
+          error.stack || 'No stack trace available'
+        }`
+      );
+    }
+
     if (error instanceof z.ZodError) {
       // Handle Zod validation errors
 
@@ -101,12 +109,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       return NextResponse.json(responseBody, { status: 400 });
     }
-
-    console.error(
-      `An error occurred while registering the user: ${error}. Stack trace: ${
-        error.stack || "No stack trace available"
-      }`
-    );
 
     const responseBody: APIResponseInterface = {
       success: false,
