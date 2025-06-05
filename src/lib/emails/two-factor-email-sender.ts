@@ -2,7 +2,7 @@ import { resend } from '@/lib/resend';
 import APIResponseInterface from '@/types/APIResponseInterface';
 import TwoFactorCodeEmail from '@/components/emails/two-factor-email';
 
-export async function resetPasswordEmailSender(
+export async function twoFactorEmailSender(
   email: string,
   username: string,
   twoFactorCode: string
