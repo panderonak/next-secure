@@ -28,6 +28,8 @@ model User {
   emailVerified DateTime? @map("email_verified")
   image         String?
   accounts      Account[]
+  twoFactorEnabled Boolean @default(false)
+  twoFactorConfirmation TwoFactorConfirmation?
   @@map("users")
 }
 
@@ -54,7 +56,6 @@ model VerificationCode {
   email     String   @unique
   code      String   @unique
   expires   DateTime
-  createdAt DateTime @default(now())
   @@index([email])
 }
 
@@ -63,6 +64,19 @@ model ResetPasswordToken {
   email     String   @unique
   token     String   @unique // Hashed token stored here
   expires   DateTime
-  createdAt DateTime @default(now())
   @@index([email])
+}
+
+model TwoFactorCode {
+  id String @id @default(cuid())
+  email String
+  code String @unique
+  expires DateTime
+}
+
+model TwoFactorConfirmation {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade) 
+  @@unique([userId])
 }
